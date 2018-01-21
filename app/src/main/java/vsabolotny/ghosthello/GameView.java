@@ -3,6 +3,8 @@ package vsabolotny.ghosthello;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -58,5 +60,44 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             }
             retry = false;
         }
+    }
+
+    // The SurfaceView class implements onTouchListener
+    // So we can override this method and detect screen touches.
+    @Override
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+
+        switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
+
+            // Player has touched the screen
+            case MotionEvent.ACTION_DOWN:
+
+                // Set isMoving so Bob is moved in the update method
+                thread.setRunning(false);
+
+                break;
+
+            // Player has removed finger from screen
+            case MotionEvent.ACTION_UP:
+
+                // Set isMoving so Bob does not move
+                thread.setRunning(true);
+                thread.run();
+
+                break;
+        }
+        return true;
+    }
+
+    // If SimpleGameEngine Activity is paused/stopped
+    // shutdown our thread.
+    public void pause() {
+        thread.setRunning(false);
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            Log.e("Error:", "joining thread");
+        }
+
     }
 }
